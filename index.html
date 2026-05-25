@@ -44,24 +44,25 @@
     color: #374151;
   }
 
-  /* 🔥 Einheitliche Größe für alle Eingabefelder & Dropdowns */
   input, select {
     width: 100%;
     padding: 12px;
     margin-bottom: 16px;
     border-radius: var(--radius);
-    border: 1px solid #d1d5db;
+    border: 1px solid #c5c5c5;
     font-size: 1rem;
-    background: #f9fafb;
+    background: #e0e0e0;
     transition: 0.2s;
     box-sizing: border-box;
+    caret-color: #111;
+    cursor: text;
   }
 
   input:focus, select:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
     outline: none;
-    background: #fff;
+    background: #d5d5d5;
   }
 
   .section {
@@ -83,6 +84,27 @@
   }
 
   .hidden { display: none; }
+
+  #resetStl {
+    margin-top: 10px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background: #ef4444;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #resetStl:hover {
+    background: #dc2626;
+  }
+
+  #stlInfo {
+    margin-top: 10px;
+    color: #2563eb;
+    font-weight: 600;
+  }
 </style>
 </head>
 
@@ -99,18 +121,29 @@
 
   <div id="volFields" class="section">
     <label>Länge (mm)</label>
-    <input type="number" id="len" placeholder="z. B. 50">
+    <input type="number" id="len" placeholder="z. B. 50">
 
     <label>Breite (mm)</label>
-    <input type="number" id="wid" placeholder="z. B. 50">
+    <input type="number" id="wid" placeholder="z. B. 50">
 
     <label>Höhe (mm)</label>
-    <input type="number" id="hei" placeholder="z. B. 50">
+    <input type="number" id="hei" placeholder="z. B. 50">
   </div>
 
   <div id="grammField" class="section hidden">
     <label>Gewicht (g)</label>
-    <input type="number" id="gramm" placeholder="z. B. 50">
+    <input type="number" id="gramm" placeholder="z. B. 50">
+  </div>
+
+  <div class="section">
+    <label>3D‑Modell (STL) hochladen</label>
+    <input type="file" id="stlFile" accept=".stl">
+
+    <div id="stlInfo" class="hidden">
+      Maße wurden automatisch aus der STL-Datei übernommen.
+    </div>
+
+    <button id="resetStl" class="hidden">STL‑Maße zurücksetzen</button>
   </div>
 
   <div class="section">
@@ -128,8 +161,14 @@
   <div class="result" id="price">0,00 €</div>
 </div>
 
+<!-- THREE.js + STLLoader -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/STLLoader.js"></script>
+
 <script>
-function euro(v) { return v.toFixed(2).replace(".", ",") + " €"; }
+function euro(v) {
+  return v.toFixed(2).replace(".", ",") + " €";
+}
 
 function updateMode() {
   const mode = document.getElementById("mode").value;
@@ -155,8 +194,8 @@ function calc() {
     const W = parseFloat(wid.value) || 0;
     const H = parseFloat(hei.value) || 0;
 
-    volume = (L * W * H) / 1000;
-    weight = volume * 1.2;
+    volume = (L * W * H) / 1000; // mm³ → cm³
+    weight = volume * 1.2;       // einfache Dichteannahme
   }
 
   const materialCost = weight * (matKg / 1000);
@@ -169,6 +208,56 @@ function calc() {
 
   price.textContent = euro(finalPrice);
 }
+
+// STL nur für Maße (X= Länge, Y= Breite, Z= Höhe)
+const loader = new THREE.STLLoader();
+
+document.getElementById("stlFile").addEventListener("change", function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    try {
+      const arrayBuffer = event.target.result;
+      const geometry = loader.parse(arrayBuffer);
+
+      geometry.computeBoundingBox();
+      const box = geometry.boundingBox;
+
+      const length = box.max.x - box.min.x;
+      const width  = box.max.y - box.min.y;
+      const height = box.max.z - box.min.z;
+
+      document.getElementById("len").value = length.toFixed(2);
+      document.getElementById("wid").value = width.toFixed(2);
+      document.getElementById("hei").value = height.toFixed(2);
+
+      document.getElementById("stlInfo").classList.remove("hidden");
+      document.getElementById("resetStl").classList.remove("hidden");
+
+      calc();
+    } catch (err) {
+      alert("STL konnte nicht gelesen werden.");
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+// Reset STL
+document.getElementById("resetStl").addEventListener("click", function () {
+
+  document.getElementById("len").value = "";
+  document.getElementById("wid").value = "";
+  document.getElementById("hei").value = "";
+  document.getElementById("gramm").value = "";
+  document.getElementById("stlFile").value = "";
+
+  document.getElementById("stlInfo").classList.add("hidden");
+  document.getElementById("resetStl").classList.add("hidden");
+
+  calc();
+});
 
 document.getElementById("mode").addEventListener("change", updateMode);
 document.querySelectorAll("input, select").forEach(el => {
