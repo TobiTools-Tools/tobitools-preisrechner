@@ -6,18 +6,48 @@
 
 <style>
   :root {
-    --primary: #2563eb;
-    --bg: #f3f4f6;
+    --primary: #6366F1;
+    --primary-light: #A5B4FC;
+    --accent: #F472B6;
+    --bg: #F9FAFB;
     --card-bg: #ffffff;
-    --radius: 12px;
-    --shadow: 0 8px 20px rgba(0,0,0,0.08);
+    --radius: 18px;
+    --shadow: 0 10px 30px rgba(99,102,241,0.15);
+    --shadow-strong: 0 15px 40px rgba(99,102,241,0.25);
   }
 
   body {
-    font-family: "Segoe UI", system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     background: var(--bg);
-    padding: 30px;
+    padding: 20px;
     margin: 0;
+  }
+
+  /* BRAND HEADER */
+  .brand-header {
+    max-width: 900px;
+    margin: 0 auto 25px auto;
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .brand-title {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: 0.03em;
+  }
+
+  .brand-claim {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #4B5563;
+    margin-top: 6px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .box {
@@ -27,58 +57,91 @@
     padding: 32px;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
+    animation: fadeIn 0.4s ease;
   }
 
-  h1 {
+  h2 {
     margin-top: 0;
-    font-size: 1.9rem;
-    font-weight: 700;
-    color: #111827;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--primary);
+    text-align: left;
   }
 
   label {
     font-weight: 600;
     margin-bottom: 6px;
     display: block;
-    color: #374151;
+    color: #4B5563;
   }
 
   input, select {
     width: 100%;
-    padding: 12px;
-    margin-bottom: 16px;
+    padding: 14px;
+    margin-bottom: 18px;
     border-radius: var(--radius);
-    border: 1px solid #c5c5c5;
+    border: 2px solid #E5E7EB;
     font-size: 1rem;
-    background: #e0e0e0;
+    background: #F3F4F6;
     transition: 0.2s;
     box-sizing: border-box;
     min-height: 48px;
   }
 
   input:focus, select:focus {
-    border-color: --primary;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
+    border-color: var(--primary);
+    background: #EEF2FF;
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.25);
     outline: none;
-    background: #d5d5d5;
+  }
+
+  /* Datei-Upload Button */
+  input[type="file"] {
+    position: relative;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+
+  input[type="file"]::file-selector-button {
+    padding: 12px 18px;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 1rem;
+    box-shadow: var(--shadow);
+  }
+
+  input[type="file"]::file-selector-button:hover {
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    box-shadow: var(--shadow-strong);
+    transform: translateY(-1px);
+  }
+
+  input[type="file"]::file-selector-button:active {
+    transform: translateY(1px);
   }
 
   .section {
     margin-top: 25px;
     padding-top: 10px;
-    border-top: 1px solid #e5e7eb;
+    border-top: 2px dashed #E5E7EB;
   }
 
   .result {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
     color: white;
-    padding: 20px;
+    padding: 22px;
     border-radius: var(--radius);
-    font-size: 1.8rem;
-    font-weight: 700;
+    font-size: 2rem;
+    font-weight: 800;
     text-align: center;
     margin-top: 30px;
-    box-shadow: 0 4px 12px rgba(37,99,235,0.4);
+    box-shadow: var(--shadow-strong);
   }
 
   .hidden { display: none; }
@@ -87,91 +150,138 @@
     margin-top: 10px;
     padding: 14px;
     border: none;
-    border-radius: 8px;
-    background: #ef4444;
+    border-radius: var(--radius);
+    background: var(--accent);
     color: white;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     width: 100%;
     font-size: 1rem;
+    transition: 0.2s;
   }
 
   #resetStl:hover {
-    background: #dc2626;
+    background: #EC4899;
+    box-shadow: var(--shadow);
   }
 
   #stlInfo {
     margin-top: 10px;
-    color: #2563eb;
+    color: var(--primary);
     font-weight: 600;
   }
 
   #priceDetails {
     margin-top: 15px;
-    font-size: 1rem;
-    color: #374151;
+    font-size: 1.1rem;
+    color: #4B5563;
     text-align: center;
   }
 
   #previewContainer {
     width: 100%;
     height: 400px;
-    background: #ddd;
-    border-radius: 12px;
+    background: #E5E7EB;
+    border-radius: var(--radius);
     overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+  }
+
+  /* Menge + / - Buttons */
+  .qty-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .qty-wrapper input {
+    flex: 1;
+    text-align: center;
+    font-size: 1.2rem;
+  }
+
+  .qty-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius);
+    border: none;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    font-size: 1.6rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: var(--shadow);
+  }
+
+  .qty-btn:hover {
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    box-shadow: var(--shadow-strong);
+    transform: translateY(-1px);
+  }
+
+  .qty-btn:active {
+    transform: translateY(1px);
+  }
+
+  /* Materialkarten */
+  .material-card {
+    margin-top: 15px;
+    padding: 16px;
+    background: #F3F4F6;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    font-size: 0.95rem;
+    color: #374151;
+    line-height: 1.5;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .material-card strong {
+    font-size: 1.1rem;
+    color: var(--primary);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  /* Mini-Diagramme */
+  .stat-row {
+    margin-top: 8px;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: #4B5563;
+    margin-bottom: 4px;
+  }
+
+  .stat-bar {
+    width: 100%;
+    height: 8px;
+    background: #E5E7EB;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .stat-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width 0.4s ease;
   }
 
   /* MOBILE OPTIMIERUNG */
   @media (max-width: 768px) {
-    body {
-      padding: 10px;
-    }
-
-    .box {
-      padding: 20px;
-    }
-
-    input, select {
-      font-size: 1.1rem;
-      padding: 14px;
-    }
-
-    h1 {
-      font-size: 1.5rem;
-      text-align: center;
-    }
-
-    #previewContainer {
-      height: 300px !important;
-    }
-
-    .result {
-      font-size: 1.5rem;
-      padding: 15px;
-    }
-
-    #priceDetails {
-      font-size: 0.95rem;
-    }
-
-    label {
-      font-size: 1rem;
-    }
+    .box { padding: 20px; }
+    h2 { font-size: 1.4rem; }
+    .brand-title { font-size: 1.8rem; }
+    #previewContainer { height: 300px !important; }
+    .result { font-size: 1.6rem; }
   }
 
   @media (max-width: 480px) {
-    #previewContainer {
-      height: 250px !important;
-    }
-
-    input, select {
-      font-size: 1rem;
-      padding: 12px;
-    }
-
-    .result {
-      font-size: 1.3rem;
-    }
+    #previewContainer { height: 250px !important; }
+    .result { font-size: 1.4rem; }
   }
 </style>
 
@@ -184,8 +294,16 @@
 
 <body>
 
+<!-- BRANDING HEADER -->
+<div class="brand-header">
+  <div class="brand-title">TobiTools</div>
+  <div class="brand-claim">
+    Kreativität mit Biss – Laser, 3D‑Druck & Plotterarbeiten
+  </div>
+</div>
+
 <div class="box">
-  <h1>TobiTools – 3D‑Druck Preisrechner</h1>
+  <h2>3D‑Druck Preisrechner</h2>
 
   <div class="section">
     <label>Länge (mm)</label>
@@ -231,20 +349,28 @@
 
   <div class="section">
     <label>Anzahl (Menge)</label>
-    <input type="number" id="qty" value="1" min="1">
+    <div class="qty-wrapper">
+      <button type="button" class="qty-btn" id="qtyMinus">−</button>
+      <input type="number" id="qty" value="1" min="1">
+      <button type="button" class="qty-btn" id="qtyPlus">+</button>
+    </div>
   </div>
 
-  <div class="section">
-    <label>Material</label>
-    <select id="material">
+<div class="section">
+  <label>Material</label>
+  <select id="material">
+      <option value="" selected disabled>Bitte Material auswählen</option>
       <option value="15|1.0">PLA – 15 €/kg</option>
       <option value="20|1.1">PETG – 20 €/kg</option>
       <option value="25|1.2">ABS/ASA – 25 €/kg</option>
-      <option value="90|1.8">PA6‑CF20 – 90 €/kg</option>
-      <option value="140|2.2">PA‑12 – 140 €/kg</option>
-      <option value="140|2.5">PPS‑GF20 – 140 €/kg</option>
-    </select>
-  </div>
+      <option value="35|1.4">ABS‑GF / ASA‑CF – 35 €/kg</option>
+      <option value="90|1.8">PA6‑CF – 90 €/kg</option>
+      <option value="140|2.2">PA12-CF – 140 €/kg</option>
+      <option value="140|2.5">PPS‑GF – 140 €/kg</option>
+  </select>
+
+  <div id="materialCard" class="material-card hidden"></div>
+</div>
 
   <div class="result" id="price">0,00 €</div>
 
@@ -252,33 +378,39 @@
 </div>
 
 <script>
-const lenEl = document.getElementById("len");
-const widEl = document.getElementById("wid");
-const heiEl = document.getElementById("hei");
-const stlFileEl = document.getElementById("stlFile");
+const len = document.getElementById("len");
+const wid = document.getElementById("wid");
+const hei = document.getElementById("hei");
+const stlFile = document.getElementById("stlFile");
 const stlInfo = document.getElementById("stlInfo");
 const resetStl = document.getElementById("resetStl");
 const infillEl = document.getElementById("infill");
-const qtyEl = document.getElementById("qty");
-const materialEl = document.getElementById("material");
+const qty = document.getElementById("qty");
+const material = document.getElementById("material");
 const price = document.getElementById("price");
 const priceDetails = document.getElementById("priceDetails");
+const materialCard = document.getElementById("materialCard");
 
 function euro(v) {
   return v.toFixed(2).replace(".", ",") + " €";
 }
 
 function calc() {
-  const matData = materialEl.value.split("|");
+  const L = parseFloat(len.value) || 0;
+  const W = parseFloat(wid.value) || 0;
+  const H = parseFloat(hei.value) || 0;
+
+  if (L === 0 || W === 0 || H === 0) {
+    price.textContent = "0,00 €";
+    priceDetails.innerHTML = "Bitte Maße eingeben.";
+    return;
+  }
+
+  const matData = material.value.split("|");
   const matKg = parseFloat(matData[0]);
   const matFactor = parseFloat(matData[1]);
 
-  const L = parseFloat(lenEl.value) || 0;
-  const W = parseFloat(widEl.value) || 0;
-  const H = parseFloat(heiEl.value) || 0;
-
   const volume = (L * W * H) / 1000;
-
   const infill = parseFloat(infillEl.value) || 0.15;
 
   const weight = volume * infill;
@@ -290,10 +422,10 @@ function calc() {
   const subtotal = materialCost + machineCost + workCost;
   const basePrice = subtotal * matFactor * 1.20;
 
-  const qtyVal = parseInt(qtyEl.value) || 1;
+  const qtyVal = parseInt(qty.value) || 1;
 
-  let discount = 1 - (1 / (1 + 0.8 * Math.log(qtyVal)));
-  discount = Math.min(discount, 0.80);
+  let discount = 1 - (1 / (1 + 1.0 * Math.log(qtyVal)));
+  discount = Math.min(discount, 1.00);
 
   let pricePerPiece = basePrice * (1 - discount);
 
@@ -307,10 +439,10 @@ function calc() {
   price.textContent = euro(totalPrice);
 
   priceDetails.innerHTML = `
-    Füllung: ${(infill * 100).toFixed(0)} %<br>
-    Einzelpreis: ${euro(otherPiecesPrice)}<br>
-    Rabatt: ${(discount * 100).toFixed(1)} %<br>
-    Gesamtpreis: ${euro(totalPrice)}
+    <strong>Füllung:</strong> ${(infill * 100).toFixed(0)} %<br>
+    <strong>Einzelpreis (ab Teil 2):</strong> ${euro(otherPiecesPrice)}<br>
+    <strong>Rabatt:</strong> ${(discount * 100).toFixed(1)} %<br>
+    <strong>Gesamtpreis:</strong> ${euro(totalPrice)}
   `;
 }
 
@@ -321,7 +453,7 @@ function initPreview() {
   const container = document.getElementById("previewContainer");
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xdddddd);
+  scene.background = new THREE.Color(0xF3F4F6);
 
   camera = new THREE.PerspectiveCamera(
     45,
@@ -342,7 +474,7 @@ function initPreview() {
   light1.position.set(1, 1, 1);
   scene.add(light1);
 
-  const light2 = new THREE.AmbientLight(0xffffff, 0.5);
+  const light2 = new THREE.AmbientLight(0xffffff, 0.6);
   scene.add(light2);
 
   animate();
@@ -357,7 +489,7 @@ function animate() {
 
 const loader = new THREE.STLLoader();
 
-stlFileEl.addEventListener("change", function (e) {
+stlFile.addEventListener("change", function (e) {
   const file = e.target.files[0];
   if (!file) return;
 
@@ -368,9 +500,9 @@ stlFileEl.addEventListener("change", function (e) {
       geometry.computeBoundingBox();
       const box = geometry.boundingBox;
 
-      lenEl.value = (box.max.x - box.min.x).toFixed(2);
-      widEl.value = (box.max.y - box.min.y).toFixed(2);
-      heiEl.value = (box.max.z - box.min.z).toFixed(2);
+      len.value = (box.max.x - box.min.x).toFixed(2);
+      wid.value = (box.max.y - box.min.y).toFixed(2);
+      hei.value = (box.max.z - box.min.z).toFixed(2);
 
       stlInfo.classList.remove("hidden");
       resetStl.classList.remove("hidden");
@@ -379,8 +511,13 @@ stlFileEl.addEventListener("change", function (e) {
 
       if (mesh) scene.remove(mesh);
 
-      const material = new THREE.MeshStandardMaterial({ color: 0x999999 });
-      mesh = new THREE.Mesh(geometry, material);
+      const materialMesh = new THREE.MeshStandardMaterial({
+        color: 0x9CA3AF,
+        metalness: 0.1,
+        roughness: 0.6
+      });
+
+      mesh = new THREE.Mesh(geometry, materialMesh);
 
       const center = new THREE.Vector3();
       geometry.boundingBox.getCenter(center);
@@ -407,10 +544,10 @@ stlFileEl.addEventListener("change", function (e) {
 });
 
 resetStl.addEventListener("click", () => {
-  lenEl.value = "";
-  widEl.value = "";
-  heiEl.value = "";
-  stlFileEl.value = "";
+  len.value = "";
+  wid.value = "";
+  hei.value = "";
+  stlFile.value = "";
   stlInfo.classList.add("hidden");
   resetStl.classList.add("hidden");
   calc();
@@ -424,12 +561,114 @@ window.addEventListener("resize", () => {
   renderer.setSize(container.offsetWidth, container.offsetHeight);
 });
 
+/* Menge + / - */
+document.getElementById("qtyPlus").addEventListener("click", () => {
+  qty.value = parseInt(qty.value || 1) + 1;
+  calc();
+});
+
+document.getElementById("qtyMinus").addEventListener("click", () => {
+  let v = parseInt(qty.value || 1);
+  if (v > 1) qty.value = v - 1;
+  calc();
+});
+
+/* Materialkarten + Mini-Diagramme */
+const materialInfo = {
+  "PLA": {
+    name: "PLA",
+    text: "• Einfach zu drucken\n• Umweltfreundlich\n• Ideal für Deko & Prototypen",
+    stats: { stiff: 60, temp: 50, tough: 40, print: 95 }
+  },
+  "PETG": {
+    name: "PETG",
+    text: "• Zäh & leicht flexibel\n• Gute Layerhaftung\n• Ideal für funktionale Teile",
+    stats: { stiff: 55, temp: 70, tough: 75, print: 80 }
+  },
+  "ABS/ASA": {
+    name: "ABS / ASA",
+    text: "• Temperaturbeständig\n• Sehr robust\n• Für Outdoor geeignet",
+    stats: { stiff: 70, temp: 85, tough: 65, print: 60 }
+  },
+  "ABS‑GF / ASA‑CF": {
+    name: "ABS‑GF / ASA‑CF",
+    text: "• Glas- & Carbonfaserverstärkt\n• Sehr hohe Steifigkeit\n• Für technische Anwendungen",
+    stats: { stiff: 85, temp: 90, tough: 70, print: 55 }
+  },
+  "PA6‑CF": {
+    name: "PA6‑CF",
+    text: "• Carbonfaserverstärkt\n• Extrem stabil\n• Für hochbelastete Bauteile",
+    stats: { stiff: 95, temp: 100, tough: 80, print: 40 }
+  },
+  "PA12-CF": {
+    name: "PA12-CF",
+    text: "• Carbonfaserverstärkt\n• Sehr zäh & langlebig\n• Für funktionale Prototypen",
+    stats: { stiff: 70, temp: 75, tough: 90, print: 65 }
+  },
+  "PPS‑GF": {
+    name: "PPS‑GF",
+    text: "• Hochtemperatur‑Material\n• Glasfaserverstärkt\n• Für Industrie‑Anwendungen",
+    stats: { stiff: 90, temp: 110, tough: 60, print: 35 }
+  }
+};
+material.addEventListener("change", () => {
+  const selected = material.selectedOptions[0].textContent.split("–")[0].trim();
+
+  const info = materialInfo[selected];
+
+  if (!info) {
+    materialCard.classList.add("hidden");
+    return;
+  }
+
+  materialCard.classList.remove("hidden");
+
+  materialCard.innerHTML = `
+    <strong>${info.name}</strong>
+    ${info.text.replace(/\n/g, "<br>")}
+
+    <div class="stat-row">
+      <div class="stat-label">Steifigkeit</div>
+      <div class="stat-bar"><div class="stat-fill" style="width:${info.stats.stiff}%;"></div></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-label">Temperaturbeständigkeit</div>
+      <div class="stat-bar"><div class="stat-fill" style="width:${info.stats.temp}%;"></div></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-label">Zähigkeit</div>
+      <div class="stat-bar"><div class="stat-fill" style="width:${info.stats.tough}%;"></div></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-label">Druckbarkeit</div>
+      <div class="stat-bar"><div class="stat-fill" style="width:${info.stats.print}%;"></div></div>
+    </div>
+  `;
+});
+
+/* Inputs triggern Berechnung */
 document.querySelectorAll("input, select").forEach(el =>
   el.addEventListener("input", calc)
 );
 
 calc();
 </script>
+
+<!-- BRANDING FOOTER -->
+<div style="
+  max-width:900px;
+  margin:40px auto 10px auto;
+  text-align:center;
+  color:#6B7280;
+  font-size:0.95rem;
+  padding:10px;
+  opacity:0.8;
+">
+  © TobiTools – Handgemacht in Horn‑Bad Meinberg
+</div>
 
 </body>
 </html>
