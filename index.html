@@ -105,6 +105,13 @@
     color: #2563eb;
     font-weight: 600;
   }
+
+  #priceDetails {
+    margin-top: 15px;
+    font-size: 1rem;
+    color: #374151;
+    text-align: center;
+  }
 </style>
 </head>
 
@@ -121,18 +128,18 @@
 
   <div id="volFields" class="section">
     <label>Länge (mm)</label>
-    <input type="number" id="len" placeholder="z. B. 50">
+    <input type="number" id="len">
 
     <label>Breite (mm)</label>
-    <input type="number" id="wid" placeholder="z. B. 50">
+    <input type="number" id="wid">
 
     <label>Höhe (mm)</label>
-    <input type="number" id="hei" placeholder="z. B. 50">
+    <input type="number" id="hei">
   </div>
 
   <div id="grammField" class="section hidden">
     <label>Gewicht (g)</label>
-    <input type="number" id="gramm" placeholder="z. B. 50">
+    <input type="number" id="gramm">
   </div>
 
   <div class="section">
@@ -140,10 +147,16 @@
     <input type="file" id="stlFile" accept=".stl">
 
     <div id="stlInfo" class="hidden">
-      Maße wurden automatisch aus der STL-Datei übernommen.
+      Maße wurden automatisch aus der STL‑Datei übernommen.
     </div>
 
     <button id="resetStl" class="hidden">STL‑Maße zurücksetzen</button>
+  </div>
+
+  <!-- MENGE -->
+  <div class="section">
+    <label>Anzahl (Menge)</label>
+    <input type="number" id="qty" value="1" min="1">
   </div>
 
   <div class="section">
@@ -159,9 +172,10 @@
   </div>
 
   <div class="result" id="price">0,00 €</div>
+
+  <div id="priceDetails"></div>
 </div>
 
-<!-- THREE.js + STLLoader -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/STLLoader.js"></script>
 
@@ -179,7 +193,6 @@ function updateMode() {
 
 function calc() {
   const mode = document.getElementById("mode").value;
-
   const matData = material.value.split("|");
   const matKg = parseFloat(matData[0]);
   const matFactor = parseFloat(matData[1]);
@@ -194,22 +207,37 @@ function calc() {
     const W = parseFloat(wid.value) || 0;
     const H = parseFloat(hei.value) || 0;
 
-    volume = (L * W * H) / 1000; // mm³ → cm³
-    weight = volume * 1.2;       // einfache Dichteannahme
+    volume = (L * W * H) / 1000;
+    weight = volume * 0.25;
   }
 
   const materialCost = weight * (matKg / 1000);
-  const printHours = volume * 0.04;
+  const printHours = volume * 0.01;
   const machineCost = printHours * 1;
-  const workCost = 0.25 * 15;
+  const workCost = (0.25 * 15) / 5;
 
   const subtotal = materialCost + machineCost + workCost;
-  const finalPrice = subtotal * matFactor * 1.20;
+  const basePrice = subtotal * matFactor * 1.20;
 
-  price.textContent = euro(finalPrice);
+  // ⭐ LOGARITHMISCHE MENGENRABATT-FORMEL
+  const qty = parseInt(document.getElementById("qty").value) || 1;
+
+  let discount = 1 - (1 / (1 + 0.35 * Math.log(qty)));
+  discount = Math.min(discount, 0.70);
+
+  const pricePerPiece = basePrice * (1 - discount);
+  const totalPrice = pricePerPiece * qty;
+
+  price.textContent = euro(totalPrice);
+
+  priceDetails.innerHTML = `
+    Einzelpreis: ${euro(pricePerPiece)}<br>
+    Rabatt: ${(discount * 100).toFixed(1)} %<br>
+    Gesamtpreis: ${euro(totalPrice)}
+  `;
 }
 
-// STL nur für Maße (X= Länge, Y= Breite, Z= Höhe)
+// STL → Maße übernehmen
 const loader = new THREE.STLLoader();
 
 document.getElementById("stlFile").addEventListener("change", function (e) {
@@ -219,51 +247,38 @@ document.getElementById("stlFile").addEventListener("change", function (e) {
   const reader = new FileReader();
   reader.onload = function (event) {
     try {
-      const arrayBuffer = event.target.result;
-      const geometry = loader.parse(arrayBuffer);
-
+      const geometry = loader.parse(event.target.result);
       geometry.computeBoundingBox();
       const box = geometry.boundingBox;
 
-      const length = box.max.x - box.min.x;
-      const width  = box.max.y - box.min.y;
-      const height = box.max.z - box.min.z;
+      len.value = (box.max.x - box.min.x).toFixed(2);
+      wid.value = (box.max.y - box.min.y).toFixed(2);
+      hei.value = (box.max.z - box.min.z).toFixed(2);
 
-      document.getElementById("len").value = length.toFixed(2);
-      document.getElementById("wid").value = width.toFixed(2);
-      document.getElementById("hei").value = height.toFixed(2);
-
-      document.getElementById("stlInfo").classList.remove("hidden");
-      document.getElementById("resetStl").classList.remove("hidden");
+      stlInfo.classList.remove("hidden");
+      resetStl.classList.remove("hidden");
 
       calc();
-    } catch (err) {
+    } catch {
       alert("STL konnte nicht gelesen werden.");
     }
   };
   reader.readAsArrayBuffer(file);
 });
 
-// Reset STL
-document.getElementById("resetStl").addEventListener("click", function () {
-
-  document.getElementById("len").value = "";
-  document.getElementById("wid").value = "";
-  document.getElementById("hei").value = "";
-  document.getElementById("gramm").value = "";
-  document.getElementById("stlFile").value = "";
-
-  document.getElementById("stlInfo").classList.add("hidden");
-  document.getElementById("resetStl").classList.add("hidden");
-
+// RESET
+resetStl.addEventListener("click", () => {
+  len.value = "";
+  wid.value = "";
+  hei.value = "";
+  stlFile.value = "";
+  stlInfo.classList.add("hidden");
+  resetStl.classList.add("hidden");
   calc();
 });
 
-document.getElementById("mode").addEventListener("change", updateMode);
-document.querySelectorAll("input, select").forEach(el => {
-  el.addEventListener("input", calc);
-});
-
+// EVENTS
+document.querySelectorAll("input, select").forEach(el => el.addEventListener("input", calc));
 updateMode();
 </script>
 
