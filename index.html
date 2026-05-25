@@ -21,7 +21,7 @@
   }
 
   .box {
-    max-width: 850px;
+    max-width: 900px;
     margin: auto;
     background: var(--card-bg);
     padding: 32px;
@@ -110,6 +110,12 @@
     text-align: center;
   }
 </style>
+
+<!-- THREE.js + STL Loader + OrbitControls -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/STLLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+
 </head>
 
 <body>
@@ -139,6 +145,27 @@
     <button id="resetStl" class="hidden">STL‑Maße zurücksetzen</button>
   </div>
 
+  <!-- STL VORSCHAU -->
+  <div class="section">
+    <label>STL Vorschau</label>
+    <div id="previewContainer" style="width:100%; height:400px; background:#ddd; border-radius:12px;"></div>
+  </div>
+
+  <div class="section">
+    <label>Füllung (%)</label>
+    <select id="infill">
+      <option value="0.10">10%</option>
+      <option value="0.15" selected>15%</option>
+      <option value="0.20">20%</option>
+      <option value="0.25">25%</option>
+      <option value="0.30">30%</option>
+      <option value="0.40">40%</option>
+      <option value="0.50">50%</option>
+      <option value="0.75">75%</option>
+      <option value="1.00">100%</option>
+    </select>
+  </div>
+
   <div class="section">
     <label>Anzahl (Menge)</label>
     <input type="number" id="qty" value="1" min="1">
@@ -161,9 +188,6 @@
   <div id="priceDetails"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/STLLoader.js"></script>
-
 <script>
 function euro(v) {
   return v.toFixed(2).replace(".", ",") + " €";
@@ -178,49 +202,77 @@ function calc() {
   const W = parseFloat(wid.value) || 0;
   const H = parseFloat(hei.value) || 0;
 
-  // Volumenberechnung
   const volume = (L * W * H) / 1000;
 
-  // Realistische Werte
-  const weight = volume * 0.15;      // 15% Infill
+  const infill = parseFloat(infillEl.value) || 0.15;
+
+  const weight = volume * infill;
   const materialCost = weight * (matKg / 1000);
-  const printHours = volume * 0.005; // Druckzeit
+  const printHours = volume * 0.005;
   const machineCost = printHours * 1;
   const workCost = 0.50;
 
   const subtotal = materialCost + machineCost + workCost;
   const basePrice = subtotal * matFactor * 1.20;
 
-  const qty = parseInt(qty.value) || 1;
+  const qtyVal = parseInt(qty.value) || 1;
 
-  // Mildere logarithmische Rabattkurve
-  let discount = 1 - (1 / (1 + 0.8 * Math.log(qty)));
+  let discount = 1 - (1 / (1 + 0.8 * Math.log(qtyVal)));
   discount = Math.min(discount, 0.80);
 
   let pricePerPiece = basePrice * (1 - discount);
 
-  // Mindestpreis nur für das erste Teil
   let firstPiecePrice = Math.max(pricePerPiece, 4.50);
   let otherPiecesPrice = pricePerPiece;
 
-  let totalPrice = 0;
-
-  if (qty === 1) {
-    totalPrice = firstPiecePrice;
-  } else {
-    totalPrice = firstPiecePrice + (otherPiecesPrice * (qty - 1));
-  }
+  let totalPrice = qtyVal === 1
+    ? firstPiecePrice
+    : firstPiecePrice + (otherPiecesPrice * (qtyVal - 1));
 
   price.textContent = euro(totalPrice);
 
   priceDetails.innerHTML = `
+    Füllung: ${(infill * 100).toFixed(0)} %<br>
     Einzelpreis (ab Teil 2): ${euro(otherPiecesPrice)}<br>
     Rabatt: ${(discount * 100).toFixed(1)} %<br>
     Gesamtpreis: ${euro(totalPrice)}
   `;
 }
 
-// STL → Maße übernehmen
+/* STL VORSCHAU */
+let scene, camera, renderer, controls, mesh;
+
+function initPreview() {
+  const container = document.getElementById("previewContainer");
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xdddddd);
+
+  camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 10000);
+  camera.position.set(150, 150, 150);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  container.innerHTML = "";
+  container.appendChild(renderer.domElement);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  const light1 = new THREE.DirectionalLight(0xffffff, 1);
+  light1.position.set(1, 1, 1);
+  scene.add(light1);
+
+  const light2 = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(light2);
+
+  animate();
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+
 const loader = new THREE.STLLoader();
 
 document.getElementById("stlFile").addEventListener("change", function (e) {
@@ -241,6 +293,29 @@ document.getElementById("stlFile").addEventListener("change", function (e) {
       stlInfo.classList.remove("hidden");
       resetStl.classList.remove("hidden");
 
+      initPreview();
+
+      if (mesh) scene.remove(mesh);
+
+      const material = new THREE.MeshStandardMaterial({ color: 0x999999 });
+      mesh = new THREE.Mesh(geometry, material);
+
+      const center = new THREE.Vector3();
+      geometry.boundingBox.getCenter(center);
+      mesh.position.sub(center);
+
+      scene.add(mesh);
+
+      const size = new THREE.Vector3(
+        box.max.x - box.min.x,
+        box.max.y - box.min.y,
+        box.max.z - box.min.z
+      ).length();
+
+      camera.position.set(size, size, size);
+      camera.lookAt(0, 0, 0);
+      controls.update();
+
       calc();
     } catch {
       alert("STL konnte nicht gelesen werden.");
@@ -249,7 +324,6 @@ document.getElementById("stlFile").addEventListener("change", function (e) {
   reader.readAsArrayBuffer(file);
 });
 
-// RESET
 resetStl.addEventListener("click", () => {
   len.value = "";
   wid.value = "";
@@ -260,7 +334,9 @@ resetStl.addEventListener("click", () => {
   calc();
 });
 
-// EVENTS
+const infillEl = document.getElementById("infill");
+const qty = document.getElementById("qty");
+
 document.querySelectorAll("input, select").forEach(el => el.addEventListener("input", calc));
 calc();
 </script>
