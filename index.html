@@ -53,10 +53,11 @@
     background: #e0e0e0;
     transition: 0.2s;
     box-sizing: border-box;
+    min-height: 48px;
   }
 
   input:focus, select:focus {
-    border-color: var(--primary);
+    border-color: --primary;
     box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
     outline: none;
     background: #d5d5d5;
@@ -84,13 +85,15 @@
 
   #resetStl {
     margin-top: 10px;
-    padding: 10px 15px;
+    padding: 14px;
     border: none;
     border-radius: 8px;
     background: #ef4444;
     color: white;
     font-weight: 600;
     cursor: pointer;
+    width: 100%;
+    font-size: 1rem;
   }
 
   #resetStl:hover {
@@ -108,6 +111,67 @@
     font-size: 1rem;
     color: #374151;
     text-align: center;
+  }
+
+  #previewContainer {
+    width: 100%;
+    height: 400px;
+    background: #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  /* MOBILE OPTIMIERUNG */
+  @media (max-width: 768px) {
+    body {
+      padding: 10px;
+    }
+
+    .box {
+      padding: 20px;
+    }
+
+    input, select {
+      font-size: 1.1rem;
+      padding: 14px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    #previewContainer {
+      height: 300px !important;
+    }
+
+    .result {
+      font-size: 1.5rem;
+      padding: 15px;
+    }
+
+    #priceDetails {
+      font-size: 0.95rem;
+    }
+
+    label {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #previewContainer {
+      height: 250px !important;
+    }
+
+    input, select {
+      font-size: 1rem;
+      padding: 12px;
+    }
+
+    .result {
+      font-size: 1.3rem;
+    }
   }
 </style>
 
@@ -145,10 +209,9 @@
     <button id="resetStl" class="hidden">STL‑Maße zurücksetzen</button>
   </div>
 
-  <!-- STL VORSCHAU -->
   <div class="section">
     <label>STL Vorschau</label>
-    <div id="previewContainer" style="width:100%; height:400px; background:#ddd; border-radius:12px;"></div>
+    <div id="previewContainer"></div>
   </div>
 
   <div class="section">
@@ -189,18 +252,30 @@
 </div>
 
 <script>
+const lenEl = document.getElementById("len");
+const widEl = document.getElementById("wid");
+const heiEl = document.getElementById("hei");
+const stlFileEl = document.getElementById("stlFile");
+const stlInfo = document.getElementById("stlInfo");
+const resetStl = document.getElementById("resetStl");
+const infillEl = document.getElementById("infill");
+const qtyEl = document.getElementById("qty");
+const materialEl = document.getElementById("material");
+const price = document.getElementById("price");
+const priceDetails = document.getElementById("priceDetails");
+
 function euro(v) {
   return v.toFixed(2).replace(".", ",") + " €";
 }
 
 function calc() {
-  const matData = material.value.split("|");
+  const matData = materialEl.value.split("|");
   const matKg = parseFloat(matData[0]);
   const matFactor = parseFloat(matData[1]);
 
-  const L = parseFloat(len.value) || 0;
-  const W = parseFloat(wid.value) || 0;
-  const H = parseFloat(hei.value) || 0;
+  const L = parseFloat(lenEl.value) || 0;
+  const W = parseFloat(widEl.value) || 0;
+  const H = parseFloat(heiEl.value) || 0;
 
   const volume = (L * W * H) / 1000;
 
@@ -215,7 +290,7 @@ function calc() {
   const subtotal = materialCost + machineCost + workCost;
   const basePrice = subtotal * matFactor * 1.20;
 
-  const qtyVal = parseInt(qty.value) || 1;
+  const qtyVal = parseInt(qtyEl.value) || 1;
 
   let discount = 1 - (1 / (1 + 0.8 * Math.log(qtyVal)));
   discount = Math.min(discount, 0.80);
@@ -233,7 +308,7 @@ function calc() {
 
   priceDetails.innerHTML = `
     Füllung: ${(infill * 100).toFixed(0)} %<br>
-    Einzelpreis (ab Teil 2): ${euro(otherPiecesPrice)}<br>
+    Einzelpreis: ${euro(otherPiecesPrice)}<br>
     Rabatt: ${(discount * 100).toFixed(1)} %<br>
     Gesamtpreis: ${euro(totalPrice)}
   `;
@@ -248,11 +323,16 @@ function initPreview() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xdddddd);
 
-  camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 10000);
+  camera = new THREE.PerspectiveCamera(
+    45,
+    container.offsetWidth / container.offsetHeight,
+    0.1,
+    10000
+  );
   camera.position.set(150, 150, 150);
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setSize(container.offsetWidth, container.offsetHeight);
   container.innerHTML = "";
   container.appendChild(renderer.domElement);
 
@@ -270,12 +350,14 @@ function initPreview() {
 
 function animate() {
   requestAnimationFrame(animate);
-  renderer.render(scene, camera);
+  if (renderer && camera && scene) {
+    renderer.render(scene, camera);
+  }
 }
 
 const loader = new THREE.STLLoader();
 
-document.getElementById("stlFile").addEventListener("change", function (e) {
+stlFileEl.addEventListener("change", function (e) {
   const file = e.target.files[0];
   if (!file) return;
 
@@ -286,9 +368,9 @@ document.getElementById("stlFile").addEventListener("change", function (e) {
       geometry.computeBoundingBox();
       const box = geometry.boundingBox;
 
-      len.value = (box.max.x - box.min.x).toFixed(2);
-      wid.value = (box.max.y - box.min.y).toFixed(2);
-      hei.value = (box.max.z - box.min.z).toFixed(2);
+      lenEl.value = (box.max.x - box.min.x).toFixed(2);
+      widEl.value = (box.max.y - box.min.y).toFixed(2);
+      heiEl.value = (box.max.z - box.min.z).toFixed(2);
 
       stlInfo.classList.remove("hidden");
       resetStl.classList.remove("hidden");
@@ -325,19 +407,27 @@ document.getElementById("stlFile").addEventListener("change", function (e) {
 });
 
 resetStl.addEventListener("click", () => {
-  len.value = "";
-  wid.value = "";
-  hei.value = "";
-  stlFile.value = "";
+  lenEl.value = "";
+  widEl.value = "";
+  heiEl.value = "";
+  stlFileEl.value = "";
   stlInfo.classList.add("hidden");
   resetStl.classList.add("hidden");
   calc();
 });
 
-const infillEl = document.getElementById("infill");
-const qty = document.getElementById("qty");
+window.addEventListener("resize", () => {
+  const container = document.getElementById("previewContainer");
+  if (!renderer || !camera || !container) return;
+  camera.aspect = container.offsetWidth / container.offsetHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.offsetWidth, container.offsetHeight);
+});
 
-document.querySelectorAll("input, select").forEach(el => el.addEventListener("input", calc));
+document.querySelectorAll("input, select").forEach(el =>
+  el.addEventListener("input", calc)
+);
+
 calc();
 </script>
 
