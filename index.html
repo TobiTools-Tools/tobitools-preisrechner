@@ -44,27 +44,24 @@
     color: #374151;
   }
 
-  /* 🔥 Cursor-Fix: Hintergrund leicht abdunkeln */
+  /* 🔥 Einheitliche Größe für alle Eingabefelder & Dropdowns */
   input, select {
     width: 100%;
     padding: 12px;
     margin-bottom: 16px;
     border-radius: var(--radius);
-    border: 1px solid #c5c5c5;
+    border: 1px solid #d1d5db;
     font-size: 1rem;
-    background: #e0e0e0;   /* ← WICHTIG: verhindert weißen Cursor */
+    background: #f9fafb;
     transition: 0.2s;
     box-sizing: border-box;
-
-    caret-color: #111;     /* dunkler Eingabe-Cursor */
-    cursor: text;          /* dunkler Mauszeiger */
   }
 
   input:focus, select:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
     outline: none;
-    background: #d5d5d5;   /* auch im Fokus nicht zu hell */
+    background: #fff;
   }
 
   .section {
@@ -102,18 +99,18 @@
 
   <div id="volFields" class="section">
     <label>Länge (mm)</label>
-    <input type="number" id="len" placeholder="z. B. 50">
+    <input type="number" id="len" placeholder="z. B. 50">
 
     <label>Breite (mm)</label>
-    <input type="number" id="wid" placeholder="z. B. 50">
+    <input type="number" id="wid" placeholder="z. B. 50">
 
     <label>Höhe (mm)</label>
-    <input type="number" id="hei" placeholder="z. B. 50">
+    <input type="number" id="hei" placeholder="z. B. 50">
   </div>
 
   <div id="grammField" class="section hidden">
     <label>Gewicht (g)</label>
-    <input type="number" id="gramm" placeholder="z. B. 50">
+    <input type="number" id="gramm" placeholder="z. B. 50">
   </div>
 
   <div class="section">
@@ -132,9 +129,7 @@
 </div>
 
 <script>
-function euro(v) {
-  return v.toFixed(2).replace(".", ",") + " €";
-}
+function euro(v) { return v.toFixed(2).replace(".", ",") + " €"; }
 
 function updateMode() {
   const mode = document.getElementById("mode").value;
