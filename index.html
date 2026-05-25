@@ -7,7 +7,6 @@
 <style>
   :root {
     --primary: #2563eb;
-    --primary-dark: #1e40af;
     --bg: #f3f4f6;
     --card-bg: #ffffff;
     --radius: 12px;
@@ -54,8 +53,6 @@
     background: #e0e0e0;
     transition: 0.2s;
     box-sizing: border-box;
-    caret-color: #111;
-    cursor: text;
   }
 
   input:focus, select:focus {
@@ -120,13 +117,7 @@
 <div class="box">
   <h1>TobiTools – 3D‑Druck Preisrechner</h1>
 
-  <label>Berechnungsmethode</label>
-  <select id="mode">
-    <option value="vol">Volumen (L × B × H)</option>
-    <option value="gramm">Gewicht (g)</option>
-  </select>
-
-  <div id="volFields" class="section">
+  <div class="section">
     <label>Länge (mm)</label>
     <input type="number" id="len">
 
@@ -135,11 +126,6 @@
 
     <label>Höhe (mm)</label>
     <input type="number" id="hei">
-  </div>
-
-  <div id="grammField" class="section hidden">
-    <label>Gewicht (g)</label>
-    <input type="number" id="gramm">
   </div>
 
   <div class="section">
@@ -153,7 +139,6 @@
     <button id="resetStl" class="hidden">STL‑Maße zurücksetzen</button>
   </div>
 
-  <!-- MENGE -->
   <div class="section">
     <label>Anzahl (Menge)</label>
     <input type="number" id="qty" value="1" min="1">
@@ -184,54 +169,52 @@ function euro(v) {
   return v.toFixed(2).replace(".", ",") + " €";
 }
 
-function updateMode() {
-  const mode = document.getElementById("mode").value;
-  document.getElementById("volFields").classList.toggle("hidden", mode !== "vol");
-  document.getElementById("grammField").classList.toggle("hidden", mode !== "gramm");
-  calc();
-}
-
 function calc() {
-  const mode = document.getElementById("mode").value;
   const matData = material.value.split("|");
   const matKg = parseFloat(matData[0]);
   const matFactor = parseFloat(matData[1]);
 
-  let weight = 0;
-  let volume = 0;
+  const L = parseFloat(len.value) || 0;
+  const W = parseFloat(wid.value) || 0;
+  const H = parseFloat(hei.value) || 0;
 
-  if (mode === "gramm") {
-    weight = parseFloat(gramm.value) || 0;
-  } else {
-    const L = parseFloat(len.value) || 0;
-    const W = parseFloat(wid.value) || 0;
-    const H = parseFloat(hei.value) || 0;
+  // Volumenberechnung
+  const volume = (L * W * H) / 1000;
 
-    volume = (L * W * H) / 1000;
-    weight = volume * 0.25;
-  }
-
+  // Realistische Werte
+  const weight = volume * 0.15;      // 15% Infill
   const materialCost = weight * (matKg / 1000);
-  const printHours = volume * 0.01;
+  const printHours = volume * 0.005; // Druckzeit
   const machineCost = printHours * 1;
-  const workCost = (0.25 * 15) / 5;
+  const workCost = 0.50;
 
   const subtotal = materialCost + machineCost + workCost;
   const basePrice = subtotal * matFactor * 1.20;
 
-  // ⭐ LOGARITHMISCHE MENGENRABATT-FORMEL
-  const qty = parseInt(document.getElementById("qty").value) || 1;
+  const qty = parseInt(qty.value) || 1;
 
-  let discount = 1 - (1 / (1 + 0.35 * Math.log(qty)));
-  discount = Math.min(discount, 0.70);
+  // Mildere logarithmische Rabattkurve
+  let discount = 1 - (1 / (1 + 0.8 * Math.log(qty)));
+  discount = Math.min(discount, 0.80);
 
-  const pricePerPiece = basePrice * (1 - discount);
-  const totalPrice = pricePerPiece * qty;
+  let pricePerPiece = basePrice * (1 - discount);
+
+  // Mindestpreis nur für das erste Teil
+  let firstPiecePrice = Math.max(pricePerPiece, 4.50);
+  let otherPiecesPrice = pricePerPiece;
+
+  let totalPrice = 0;
+
+  if (qty === 1) {
+    totalPrice = firstPiecePrice;
+  } else {
+    totalPrice = firstPiecePrice + (otherPiecesPrice * (qty - 1));
+  }
 
   price.textContent = euro(totalPrice);
 
   priceDetails.innerHTML = `
-    Einzelpreis: ${euro(pricePerPiece)}<br>
+    Einzelpreis (ab Teil 2): ${euro(otherPiecesPrice)}<br>
     Rabatt: ${(discount * 100).toFixed(1)} %<br>
     Gesamtpreis: ${euro(totalPrice)}
   `;
@@ -279,7 +262,7 @@ resetStl.addEventListener("click", () => {
 
 // EVENTS
 document.querySelectorAll("input, select").forEach(el => el.addEventListener("input", calc));
-updateMode();
+calc();
 </script>
 
 </body>
