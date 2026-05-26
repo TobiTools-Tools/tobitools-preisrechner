@@ -75,6 +75,12 @@
     color: #4B5563;
   }
 
+.upload-hint {
+  font-size: 0.9rem;
+  color: #6B7280;
+  margin-top: -10px;
+}
+
   input, select {
     width: 100%;
     padding: 14px;
@@ -328,6 +334,11 @@
   <div class="section">
     <label>3D‑Modell (STL) hochladen</label>
     <input type="file" id="stlFile" accept=".stl">
+
+  <p style="font-size:0.9rem; color:#6B7280; margin-top:-10px;">
+    Die hochgeladene Datei wird ausschließlich lokal im Browser verarbeitet. 
+    Es erfolgt keine Speicherung oder Übertragung an einen Server.
+  </p>
 
     <div id="stlInfo" class="hidden">
       Maße wurden automatisch aus der STL‑Datei übernommen.
