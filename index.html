@@ -443,8 +443,8 @@ function calc() {
 
   const qtyVal = parseInt(qty.value) || 1;
 
-  let discount = 1 - (1 / (1 + 1.0 * Math.log(qtyVal)));
-  discount = Math.min(discount, 1.00);
+  let discount = 1 - (1 / (1 + 0.5 * Math.log(qtyVal)));
+  discount = Math.min(discount, 0.60);
 
   let pricePerPiece = basePrice * (1 - discount);
 
