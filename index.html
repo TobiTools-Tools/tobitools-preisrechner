@@ -381,11 +381,14 @@
 <select id="material">
   <option value="15|1.0" selected>PLA – 15 €/kg</option>
   <option value="20|1.1">PETG – 20 €/kg</option>
-  <option value="25|1.2">ABS/ASA – 25 €/kg</option>
-  <option value="35|1.4">ABS‑GF / ASA‑CF – 35 €/kg</option>
-  <option value="90|1.8">PA6‑CF – 90 €/kg</option>
-  <option value="140|2.2">PA12-CF – 140 €/kg</option>
-  <option value="140|2.5">PPS‑GF – 140 €/kg</option>
+  <option value="25|1.2">ABS – 25 €/kg</option>
+  <option value="25|1.2">ASA – 25 €/kg</option>
+  <option value="35|1.4">ABS‑GF – 30 €/kg</option>
+  <option value="45|1.6">ASA‑CF – 40 €/kg</option>
+  <option value="70|2.0">PA6‑GF –  70 €/kg</option>
+  <option value="90|2.3">PA6‑CF –  90 €/kg</option>
+  <option value="140|2.5">PA12-CF – 120 €/kg</option>
+  <option value="140|3.5">PPS‑GF – 140 €/kg</option>
 </select>
 
   <div id="materialCard" class="material-card hidden"></div>
@@ -434,17 +437,17 @@ function calc() {
 
   const weight = volume * infill;
   const materialCost = weight * (matKg / 1000);
-  const printHours = volume * 0.005;
+  const printHours = volume * 0.010;
   const machineCost = printHours * 1;
-  const workCost = 0.50;
+  const workCost = 0.80;
 
   const subtotal = materialCost + machineCost + workCost;
   const basePrice = subtotal * matFactor * 1.20;
 
   const qtyVal = parseInt(qty.value) || 1;
 
-  let discount = 1 - (1 / (1 + 0.5 * Math.log(qtyVal)));
-  discount = Math.min(discount, 0.60);
+  let discount = 1 - (1 / (1 + 0.45 * Math.log(qtyVal)));
+  discount = Math.min(discount, 0.55);
 
   let pricePerPiece = basePrice * (1 - discount);
 
@@ -596,38 +599,53 @@ document.getElementById("qtyMinus").addEventListener("click", () => {
 const materialInfo = {
   "PLA": {
     name: "PLA",
-    text: "• Einfach zu drucken\n• Umweltfreundlich\n• Ideal für Deko & Prototypen",
-    stats: { stiff: 60, temp: 50, tough: 40, print: 95 }
+    text: "• Ideal für Deko‑Objekte, Modelle, Figuren und leichte Alltagsartikel",
+    stats: { stiff: 45, temp: 21, tough: 18, streng: 54 }
   },
   "PETG": {
     name: "PETG",
-    text: "• Zäh & leicht flexibel\n• Gute Layerhaftung\n• Ideal für funktionale Teile",
-    stats: { stiff: 55, temp: 70, tough: 75, print: 80 }
+    text: "• Perfekt für belastbare Haushaltsartikel, Halterungen und funktionale Teile",
+    stats: { stiff: 35, temp: 28, tough: 14, streng: 43 }
   },
-  "ABS/ASA": {
-    name: "ABS / ASA",
-    text: "• Temperaturbeständig\n• Sehr robust\n• Für Outdoor geeignet",
-    stats: { stiff: 70, temp: 85, tough: 65, print: 60 }
+  "ABS": {
+    name: "ABS",
+    text: "• Geeignet für robuste Gebrauchsgegenstände, Gehäuse und stoßfeste Bauteile",
+    stats: { stiff: 40, temp: 38, tough: 100, streng: 35 }
+ },
+  "ASA": {
+    name: "ASA",
+    text: "• Optimal für Outdoor‑Teile, Gartenprodukte,  und UV‑exponierte Anwendungen",
+    stats: { stiff: 45, temp: 38, tough: 56, streng: 46 }
   },
-  "ABS‑GF / ASA‑CF": {
-    name: "ABS‑GF / ASA‑CF",
-    text: "• Glas- & Carbonfaserverstärkt\n• Sehr hohe Steifigkeit\n• Für technische Anwendungen",
-    stats: { stiff: 85, temp: 90, tough: 70, print: 55 }
+  "ABS‑GF": {
+    name: "ABS‑GF",
+    text: "• Für mechanisch belastete Bauteile, die steif und formstabil sein müssen",
+    stats: { stiff: 40, temp: 44, tough: 40, streng: 65 }
+  },
+  "ASA‑CF": {
+    name: "ASA-CF",
+    text: "• Für hochsteife Premium‑Teile, z. B. Design‑Bauteile, Abdeckungen, technische Komponenten",
+    stats: { stiff: 48, temp: 47, tough: 30, streng: 43 }
+  },
+  "PA6‑GF": {
+    name: "PA6‑GF",
+    text: "• Für hochfeste, abriebfeste Maschinen‑ und Funktionsteile",
+    stats: { stiff: 63, temp: 85, tough: 65, streng: 83 }
   },
   "PA6‑CF": {
     name: "PA6‑CF",
-    text: "• Carbonfaserverstärkt\n• Extrem stabil\n• Für hochbelastete Bauteile",
-    stats: { stiff: 95, temp: 100, tough: 80, print: 40 }
+    text: "• Für extrem steife, hochbelastbare technische Bauteile im Dauerbetrieb",
+    stats: { stiff: 100, temp: 91, tough: 75, streng: 100 }
   },
   "PA12-CF": {
     name: "PA12-CF",
-    text: "• Carbonfaserverstärkt\n• Sehr zäh & langlebig\n• Für funktionale Prototypen",
-    stats: { stiff: 70, temp: 75, tough: 90, print: 65 }
+    text: "• Für präzise, zähe Funktionsbauteile, die Feuchtigkeit und Belastung standhalten müssen",
+    stats: { stiff: 41, temp: 56, tough: 65, streng: 70 }
   },
   "PPS‑GF": {
     name: "PPS‑GF",
-    text: "• Hochtemperatur‑Material\n• Glasfaserverstärkt\n• Für Industrie‑Anwendungen",
-    stats: { stiff: 90, temp: 110, tough: 60, print: 35 }
+    text: "• Für Hochtemperatur‑ und Industrie‑Bauteile, z. B. Maschinenkomponenten, technische Spezialteile",
+    stats: { stiff: 60, temp: 100, tough: 41, streng: 64 }
   }
 };
 material.addEventListener("change", () => {
@@ -652,8 +670,8 @@ material.addEventListener("change", () => {
     </div>
 
     <div class="stat-row">
-      <div class="stat-label">Temperaturbeständigkeit</div>
-      <div class="stat-bar"><div class="stat-fill" style="width:${info.stats.temp}%;"></div></div>
+      <div class="stat-label">Festigkeit</div>
+      <div class="stat-bar"><div class="stat-fill" style="width:${info.stats.streng}%;"></div></div>
     </div>
 
     <div class="stat-row">
@@ -662,8 +680,8 @@ material.addEventListener("change", () => {
     </div>
 
     <div class="stat-row">
-      <div class="stat-label">Druckbarkeit</div>
-      <div class="stat-bar"><div class="stat-fill" style="width:${info.stats.print}%;"></div></div>
+      <div class="stat-label">Temperaturbeständigkeit</div>
+      <div class="stat-bar"><div class="stat-fill" style="width:${info.stats.temp}%;"></div></div>
     </div>
   `;
 });
